@@ -15,35 +15,47 @@ from .serializers import TestApiSerializers
 
 class ApiTestView(APIView):
     
-    def get(self,*args,**kwargs):
-        my_data = TestApi.objects.filter(id=13)
-        print(type(my_data.values()))
-        # print("my", my_data.pk)
-        # print("my",my_data)
-        # print("count",my_data.values_list().annotate())
-        # for item in my_data.values():
-        #     print(item)
-        # returned = [item for item in my_data.values_list()[0]]
-        # print("returned",returned)
-        return Response({
-            "data" :(my_data.values())
-        })
+    def get(self, request,*args,**kwargs):
+        queryset = TestApi.objects.all()
+        serializer = TestApiSerializers(queryset,many=True)
+        return Response(serializer.data)
 
-    def post(self,request,*args,**kwargs):
-        payload = TestApi.objects.create(
-            name = request.data["name"],
-            description = request.data["description"],
-            phone_no = request.data["phone_no"],
-            is_alive = request.data["is_alive"],
-            amount = request.data["amount"],
-        )
+    def post(self, request,*args,**kwargs):
+        data = request.data
+        serializer = TestApiSerializers(data=data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+    
+    # def get(self,*args,**kwargs):
+    #     my_data = TestApi.objects.filter(id=13)
+    #     print(type(my_data.values()))
+    #     # print("my", my_data.pk)
+    #     # print("my",my_data)
+    #     # print("count",my_data.values_list().annotate())
+    #     # for item in my_data.values():
+    #     #     print(item)
+    #     # returned = [item for item in my_data.values_list()[0]]
+    #     # print("returned",returned)
+    #     return Response({
+    #         "data" :(my_data.values())
+    #     })
+
+    # def post(self,request,*args,**kwargs):
+    #     payload = TestApi.objects.create(
+    #         name = request.data["name"],
+    #         description = request.data["description"],
+    #         phone_no = request.data["phone_no"],
+    #         is_alive = request.data["is_alive"],
+    #         amount = request.data["amount"],
+    #     )
         
-        print("payload",payload)
-        print("modelto dict",model_to_dict(payload))
+    #     print("payload",payload)
+    #     print("modelto dict",model_to_dict(payload))
         
-        return JsonResponse({
-            "data" : model_to_dict(payload)
-        })
+    #     return JsonResponse({
+    #         "data" : model_to_dict(payload)
+    #     })
 class ListApiCreateView(generics.ListCreateAPIView):
     serializer_class = TestApiSerializers
     queryset = TestApi.objects.all()
